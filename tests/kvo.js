@@ -6,13 +6,31 @@ describe("KVO", function() {
 
 		it("should create property with default setters/getters", function() {
 			var obj = {};
-			
+
 			kvo.convert(obj, "foo");
 
 			obj.foo = "bar";
 
+			console.dir(kvo);
+			console.dir(obj);
 			(obj.foo).should.equal("bar");
 			(obj._kvo.foo).should.equal("bar");
+		});
+
+		it("should overwrite setter", function() {
+			var obj = {
+				_firstname:"",
+				set firstname (value) {
+					var first = value.toLowerCase(value);
+					first = first.charAt(0).toUpperCase() + first.slice(1);
+					this._firstname = first;
+				}
+			};
+
+			obj.firstname = "ALFRED";
+			(obj._firstname).should.equal("Alfred");
+
+			kvo.convert(obj, "firstname");
 		});
 	});
 });
