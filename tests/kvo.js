@@ -11,8 +11,6 @@ describe("KVO", function() {
 
 			obj.foo = "bar";
 
-			console.dir(kvo);
-			console.dir(obj);
 			(obj.foo).should.equal("bar");
 			(obj._kvo.foo).should.equal("bar");
 		});
