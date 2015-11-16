@@ -1,5 +1,6 @@
 var KVO = function() { };
 KVO.prototype.setKey = "_kvo";
+KVO.prototype.bound = {};
 
 KVO.prototype.defaultSetter = function(obj, prop) {
 	return KVO.defaultSetter(this, obj, prop);
@@ -17,24 +18,24 @@ KVO.prototype.convert = function(obj, prop) {
 	return KVO.convert(this, obj, prop);
 };
 
+KVO.prototype.boundID = function(obj) {
+	return KVO.boundID(this, obj);
+}
+
 KVO.prototype.setup = function(obj) {
 	return KVO.setup(this, obj);
 };
 
-KVO.defaultSetter = function(kvo, obj, prop) {
-	var _kvo = kvo.setKey;
-
+KVO.defaultSetter = function(kvo, id, prop) {
 	return function(value) {
-		this[_kvo][prop] = value;
+		kvo[id][prop] = value;
 		return value;
 	}.bind(obj);
 };
 
-KVO.defaultGetter = function(kvo, obj, prop) {
-	var _kvo = kvo.setKey;
-
+KVO.defaultGetter = function(kvo, id, prop) {
 	return function() {
-		return this[_kvo][prop];
+		return this[id][prop];
 	}.bind(obj);
 };
 
@@ -63,8 +64,6 @@ KVO.convert = function(kvo, obj, prop) {
 	var _kvo = kvo.setKey;
 	kvo.setup(obj);
 
-	obj[_kvo][prop] = "";
-
 	var setter = kvo.generateSetter(obj, prop);
 	var getter = kvo.defaultGetter(obj, prop);
 
@@ -74,11 +73,30 @@ KVO.convert = function(kvo, obj, prop) {
 	});
 };
 
-KVO.setup = function(kvo, obj) {
-	var _kvo = kvo.setKey;
-
-	if(_.isUndefined(obj[_kvo])) {
-		obj[_kvo] = {};
-	}
+function uid() {
+	return Math.floor((1 + Math.random()) * 0x100000).toString(16);
 }
+KVO.boundID = function(kvo, obj) {
+	for( var key in kvo.bound ) {
+		var object = kvo.bound[key];
+
+		if(object === obj) { return key; }
+	}
+
+	return false;
+};
+
+KVO.setup = function(kvo, obj) {
+	var id = kvo.boundID(obj);
+
+	if(id === false) {
+		do {
+			id = uid();
+		}while( !_.isUndefined(kvo.bound[id]) )
+
+		kvo.bound[id] = obj;
+	}
+	
+	return id;
+};
 
