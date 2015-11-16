@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>Editor</title>
+
+	<script src="../bower_components/underscore/underscore.js"></script>
+	<script src="../bower_components/should/should.js"></script>
+	<script src="../bower_components/mocha/mocha.js"></script>
+	<link rel="stylesheet" href="../bower_components/mocha/mocha.css">
+
+	<script src="../src/kvo.js"></script>
+	<script src="kvo.js"></script>
+</head>
+
+<body>
+	<div id="mocha"></div>
+  	<div id="messages"></div>
+  	<div id="fixtures"></div>
+</body>
+
+</html>
+
+<script>
+	mocha.setup("bdd");
+	setupTests();
+	mocha.run();
+</script>

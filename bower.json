@@ -1,0 +1,27 @@
+{
+  "name": "kvo",
+  "main": "src/kvo.js",
+  "authors": [
+    "Alfred Cepeda <AlfredJCepeda@gmail.com>"
+  ],
+  "description": "Simple unobtrusive key value observing",
+  "moduleType": [],
+  "keywords": [
+    "kvo",
+    "observables"
+  ],
+  "license": "MIT",
+  "homepage": "http://aljcepeda.com",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "mocha": "~2.3.4",
+    "should": "~7.1.1",
+    "underscore": "~1.8.3"
+  }
+}
