@@ -1,5 +1,6 @@
 var KVO = function() { };
 KVO.prototype.setKey = "_kvo";
+
 KVO.prototype.defaultSetter = function(obj, prop) {
 	return KVO.defaultSetter(this, obj, prop);
 };
@@ -38,19 +39,23 @@ KVO.defaultGetter = function(kvo, obj, prop) {
 };
 
 KVO.generateSetter = function(kvo, obj, prop) {
+	var setter;
 	var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
-	var setter = kvo.defaults.setter(obj, prop);
 
 	if( !_.isUndefined(descriptor) && !_.isUndefined(descriptor.set) ) {
-		var oldSetter = descriptor.set;
-
-		return function(value) {
-			oldSetter(value);
-			setter(value);
-		};
+		setter = descriptor.set;
+		console.dir(descriptor);
+	} else {
+		setter = kvo.defaultSetter(obj, prop);
 	}
 
-	return setter;
+	setter = setter.bind(obj);
+
+	return function(value) {
+		//Do other kvo stuff
+		console.log(prop + " has been set to: " + value);
+		setter(value);
+	};
 };
 
 KVO.convert = function(kvo, obj, prop) {
@@ -60,7 +65,7 @@ KVO.convert = function(kvo, obj, prop) {
 
 	obj[_kvo][prop] = "";
 
-	var setter = kvo.defaultSetter(obj, prop);
+	var setter = kvo.generateSetter(obj, prop);
 	var getter = kvo.defaultGetter(obj, prop);
 
 	Object.defineProperty(obj, prop, { 

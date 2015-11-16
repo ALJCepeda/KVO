@@ -29,6 +29,9 @@ describe("KVO", function() {
 			(obj._firstname).should.equal("Alfred");
 
 			kvo.convert(obj, "firstname");
+
+			obj.firstname = "SHAWN";
+			(obj._firstname).should.equal("Shawn");
 		});
 	});
 });
