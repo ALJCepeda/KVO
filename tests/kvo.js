@@ -2,9 +2,10 @@ function setupTests() {
 
 describe("KVO", function() {
 	describe("KVO Conversion", function() {
-		var kvo = new KVO();
+		
 
 		it("should create property with default setters/getters", function() {
+			var kvo = new KVO();
 			var obj = {};
 
 			kvo.convert(obj, "foo");
@@ -12,10 +13,14 @@ describe("KVO", function() {
 			obj.foo = "bar";
 
 			(obj.foo).should.equal("bar");
-			(obj._kvo.foo).should.equal("bar");
+
+			var ID = obj._kvoID;
+			var foo = kvo.get(ID, "foo");
+			(foo).should.equal("bar");
 		});
 
 		it("should overwrite setter", function() {
+			var kvo = new KVO();
 			var obj = {
 				_firstname:"",
 				set firstname (value) {
