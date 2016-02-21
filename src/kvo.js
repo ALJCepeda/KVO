@@ -1,22 +1,25 @@
-var KVO = function() { };
+var KVO = function() { 
+	this.bound = {};
+	this.observer = {};
+};
 
 KVO.prototype.setKey = "_kvo";
 
-KVO.prototype.didSet = function(obj, prop, value) {
+KVO.prototype.didSet = function(id, prop, value) {
 
 };
 
-KVO.prototype.didGet = function(obj, prop, value) {
+KVO.prototype.didGet = function(id, prop, value) {
 	
 };
 
-KVO.prototype.wrapSetter = function(obj, prop, setter) {
+KVO.prototype.wrapSetter = function(id, prop, setter) {
 	var self = this;
 
 	return function(value) {
 		setter.call(this, value);
 		self.didSet(this, prop, value);
-	}.bind(obj);
+	};
 };
 
 KVO.prototype.generateSetter = function(obj, prop) {
@@ -51,8 +54,11 @@ KVO.prototype.generateGetter = function(obj, prop) {
 };
 
 KVO.prototype.convert = function(obj, prop) {
+	if(this.isBound(obj) === false) {
+		this.bind(obj);
+	}
+
 	var hasSet = hasGet = false;
-	this.setup(obj, prop);
 
 	var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
 	if(typeof descriptor !== "undefined") {
@@ -64,6 +70,11 @@ KVO.prototype.convert = function(obj, prop) {
 			throw new Error("Must have both a setter and a getter for prop ("+prop+")");
 			return false;
 		}
+	}
+
+	var _kvo = this.setKey;
+	if(typeof obj[_kvo][prop] === "undefined") {
+		obj[_kvo][prop] = obj[prop];
 	}
 
 	var setter, getter;
@@ -82,15 +93,24 @@ KVO.prototype.convert = function(obj, prop) {
 	return true;
 };
 
-KVO.prototype.setup = function(obj, prop) {
+KVO.prototype.isBound = function(obj) {
 	var _kvo = this.setKey;
-
 	if(typeof obj[_kvo] === "undefined") {
-		obj[_kvo] = {};
+		return false;
 	}
+	
+	var id = obj[_kvo]["_kvoid"];
+	return typeof this.bound[id] !== "undefined";
+};
 
-	if(typeof obj[_kvo][prop] === "undefined") {
-		obj[_kvo][prop] = obj[prop];
-	}
+KVO.prototype.bind = function(obj) {
+	var id;
+	do {
+		id = Math.random().toString(36).substr(2, 5);
+	}while(typeof this.bound[id] !== "undefined")
+
+	var _kvo = this.setKey;
+	obj[_kvo] = { "_kvoid":id }; 
+	this.bound[id] = obj;
 }
 
