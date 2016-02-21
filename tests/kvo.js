@@ -7,7 +7,7 @@ describe("KVO", function() {
 		beforeEach(function() {
 			kvo = new KVO();
 		});
-
+		
 		it("throw exception, missing getter", function() {
 			var obj = {
 				_firstname:"",
@@ -132,7 +132,47 @@ describe("KVO", function() {
 
 			obj.firstname = "Alfred";
 		});
-	});
+
+		it("notifies property being set once the no more", function() {
+			var obj = { firstname:"" };
+			kvo.convert(obj, "firstname");
+
+			obj.once_didSet("firstname", function(value) {
+				(value).should.equal("Alfred");
+			});
+
+			obj.firstname = "Alfred";
+			obj.firstname = "Shawn";
+		});
+
+		it("notified of property being get", function() {
+			var obj = { firstname:"Alfred" };
+			kvo.convert(obj, "firstname");
+
+			obj.on_didGet("firstname", function(value) {
+				(value).should.equal("Alfred");
+			});
+
+			var firstname = obj.firstname;
+			(firstname).should.equal("Alfred");
+		});
+
+		it("notifies property being get once the no more", function() {
+			var obj = { firstname:"Alfred" };
+			kvo.convert(obj, "firstname");
+
+			obj.once_didGet("firstname", function(value) {
+				(value).should.equal("Alfred");
+			});
+
+			var firstname = obj.firstname;
+			(firstname).should.equal("Alfred");
+
+			obj.firstname = "Shawn";
+			firstname = obj.firstname;
+			(firstname).should.equal("Shawn");
+		});
+	});	
 });
 
 }
