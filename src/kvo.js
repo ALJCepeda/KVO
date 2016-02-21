@@ -15,9 +15,15 @@ KVO.prototype.do_didGet = function(id, prop, value) {
 	this.observers[id].didGet[prop].forEach(function(obs){
 		obs(value);
 	});
-};;
+};
 
-//KVO.prototype.didSet = function()
+KVO.prototype.on_didSet = function(id, prop, func) {
+	this.observers[id].didSet[prop].push(func);
+};
+
+KVO.prototype.on_didGet = function(id, prop, func) {
+	this.observers[id].didSet[prop].push(func);
+};
 
 KVO.prototype.wrapSetter = function(id, prop, setter) {
 	var self = this;
@@ -112,6 +118,7 @@ KVO.prototype.isBound = function(obj) {
 };
 
 KVO.prototype.bind = function(obj) {
+	var self = this;
 	var id;
 	do {
 		id = Math.random().toString(36).substr(2, 5);
@@ -124,6 +131,14 @@ KVO.prototype.bind = function(obj) {
 	this.observers[id] = {
 		didSet:{},
 		didGet:{}
+	};
+
+	obj.on_didSet = function(prop,func) {
+		self.on_didSet(id, prop, func);
+	};
+
+	obj.on_didGet = function(prop, func) {
+		self.on_didGet(id, prop, func);
 	};
 }
 

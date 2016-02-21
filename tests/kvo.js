@@ -1,7 +1,7 @@
 function setupTests() {
 
 describe("KVO", function() {
-	describe("KVO Conversion", function() {
+	xdescribe("KVO Conversion", function() {
 		var kvo;
 
 		beforeEach(function() {
@@ -112,6 +112,25 @@ describe("KVO", function() {
 			obj.firstname = "SHAWN";
 			(obj._firstname).should.equal("SHAWN");
 			(obj.firstname).should.equal("Shawn");
+		});
+	});
+
+	describe("Post Hooks", function() {
+		var kvo;
+
+		beforeEach(function() {
+			kvo = new KVO();
+		});
+
+		it("notified of property being set", function() {
+			var obj = { firstname:"" };
+			kvo.convert(obj, "firstname");
+
+			obj.on_didSet("firstname", function(value) {
+				(value).should.equal("Alfred");
+			});
+
+			obj.firstname = "Alfred";
 		});
 	});
 });
