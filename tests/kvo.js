@@ -22,13 +22,14 @@ describe("KVO", function() {
 					var first = value.toLowerCase(value);
 					first = first.charAt(0).toUpperCase() + first.slice(1);
 					this._firstname = first;
+				},
+				get firstname () {
+					return this._firstname;
 				}
 			};
 
 			obj.firstname = "ALFRED";
 			(obj._firstname).should.equal("Alfred");
-
-			kvo.convert(obj, "firstname");
 
 			obj.firstname = "SHAWN";
 			(obj._firstname).should.equal("Shawn");

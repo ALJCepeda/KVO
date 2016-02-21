@@ -1,84 +1,91 @@
 var KVO = function() { };
+
 KVO.prototype.setKey = "_kvo";
 
-KVO.prototype.defaultSetter = function(obj, prop) {
-	return KVO.defaultSetter(this, obj, prop);
+KVO.prototype.didSet = function(obj, prop, value) {
+
 };
 
-KVO.prototype.defaultGetter = function(obj, prop) {
-	return KVO.defaultGetter(this, obj, prop);
+KVO.prototype.didGet = function(obj, prop, value) {
+	
+};
+
+KVO.prototype.wrapSetter = function(obj, prop, setter) {
+	return function(value) {
+		setter.call(this, value);
+		self.didSet(this, prop, value);
+	}.bind(obj);
 };
 
 KVO.prototype.generateSetter = function(obj, prop) {
-	return KVO.generateSetter(this, obj, prop);
-};
-
-KVO.prototype.convert = function(obj, prop) {
-	return KVO.convert(this, obj, prop);
-};
-
-KVO.prototype.setup = function(obj) {
-	return KVO.setup(this, obj);
-};
-
-KVO.defaultSetter = function(kvo, obj, prop) {
-	var _kvo = kvo.setKey;
+	var self = this;
+	var _kvo = this.setKey;
 
 	return function(value) {
 		this[_kvo][prop] = value;
+		self.didSet(this, prop, value);
+	}.bind(obj);
+};
+
+KVO.prototype.wrapGetter = function(obj, prop, getter) {
+	return function() {
+		var value = getter.call(this);
+		self.didGet(this, prop, value);
 		return value;
 	}.bind(obj);
 };
 
-KVO.defaultGetter = function(kvo, obj, prop) {
-	var _kvo = kvo.setKey;
+KVO.prototype.generateGetter = function(obj, prop) {
+	var self = this;
+	var _kvo = this.setKey;
 
 	return function() {
-		return this[_kvo][prop];
+		var value = this[_kvo][prop];
+		self.didGet(this, prop, value);
+		return value;
 	}.bind(obj);
 };
 
-KVO.generateSetter = function(kvo, obj, prop) {
-	var setter;
-	var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
+KVO.prototype.convert = function(obj, prop) {
+	var hasSet = hasGet = false;
+	this.setup(obj, prop);
 
-	if( !_.isUndefined(descriptor) && !_.isUndefined(descriptor.set) ) {
-		setter = descriptor.set;
-		console.dir(descriptor);
-	} else {
-		setter = kvo.defaultSetter(obj, prop);
+	var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
+	if(typeof descriptor !== "undefined") {
+		var hasSet = descriptor.set !== "undefined";
+		var hasGet = descriptor.get !== "undefined";
+
+		if((hasSet && !hasGet) || (hasGet && !hasSet)) {
+			throw new Error("Must have both a setter/getter or neither");
+			return false;
+		}
 	}
 
-	setter = setter.bind(obj);
-
-	return function(value) {
-		//Do other kvo stuff
-		console.log(prop + " has been set to: " + value);
-		setter(value);
-	};
-};
-
-KVO.convert = function(kvo, obj, prop) {
-	var setter, getter, oldSetter;
-	var _kvo = kvo.setKey;
-	kvo.setup(obj);
-
-	obj[_kvo][prop] = "";
-
-	var setter = kvo.generateSetter(obj, prop);
-	var getter = kvo.defaultGetter(obj, prop);
+	var setter, getter;
+	if(hasSet && hasGet) {
+		setter = this.wrapSetter(obj, prop, descriptor.set);
+		getter = this.wrapGetter(obj, prop, descriptor.get);
+	} else {
+		setter = this.generateSetter(obj, prop);
+		getter = this.generateGetter(obj, prop);
+	}
 
 	Object.defineProperty(obj, prop, { 
 		set: setter,
 		get: getter
 	});
+	return true;
 };
 
-KVO.setup = function(kvo, obj) {
-	var _kvo = kvo.setKey;
+KVO.prototype.setup = function(obj, prop) {
+	var _kvo = this.setKey;
 
-	if(_.isUndefined(obj[_kvo])) {
+	if(typeof obj[_kvo] === "undefined") {
 		obj[_kvo] = {};
+	}
+
+	if(typeof obj[_kvo][prop] === "undefined") {
+		obj[_kvo][prop] = obj[prop];
 	}
 }
 
