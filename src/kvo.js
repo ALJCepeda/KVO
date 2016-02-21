@@ -11,6 +11,8 @@ KVO.prototype.didGet = function(obj, prop, value) {
 };
 
 KVO.prototype.wrapSetter = function(obj, prop, setter) {
+	var self = this;
+
 	return function(value) {
 		setter.call(this, value);
 		self.didSet(this, prop, value);
@@ -28,6 +30,8 @@ KVO.prototype.generateSetter = function(obj, prop) {
 };
 
 KVO.prototype.wrapGetter = function(obj, prop, getter) {
+	var self = this;
+
 	return function() {
 		var value = getter.call(this);
 		self.didGet(this, prop, value);
@@ -52,11 +56,12 @@ KVO.prototype.convert = function(obj, prop) {
 
 	var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
 	if(typeof descriptor !== "undefined") {
-		var hasSet = descriptor.set !== "undefined";
-		var hasGet = descriptor.get !== "undefined";
+		var hasSet = typeof descriptor.set !== "undefined";
+		var hasGet = typeof descriptor.get !== "undefined";
 
 		if((hasSet && !hasGet) || (hasGet && !hasSet)) {
-			throw new Error("Must have both a setter/getter or neither");
+			console.dir(obj);
+			throw new Error("Must have both a setter and a getter for prop ("+prop+")");
 			return false;
 		}
 	}
