@@ -39,14 +39,6 @@ KVO.prototype.once_didSet = function(obj, prop, func) {
 	this.once_didSetID(id, prop, func);
 };
 
-KVO.prototype.on_didSetID = function(id, prop, func) {
-	this.observers[id].didSet[prop].push([func, false]);
-};
-
-KVO.prototype.once_didSetID = function(id, prop, func) {
-	this.observers[id].didSet[prop].push([func, true]);
-};
-
 KVO.prototype.on_didGet = function(obj, prop, func) {
 	var _kvo = this.setKey
 	var id = obj[_kvo]["_kvoid"];
@@ -61,6 +53,14 @@ KVO.prototype.once_didGet = function(obj, prop, func) {
 	this.once_didGetID(id, prop, func);
 };
 
+KVO.prototype.on_didSetID = function(id, prop, func) {
+	this.observers[id].didSet[prop].push([func, false]);
+};
+
+KVO.prototype.once_didSetID = function(id, prop, func) {
+	this.observers[id].didSet[prop].push([func, true]);
+};
+
 KVO.prototype.on_didGetID = function(id, prop, func) {
 	this.observers[id].didSet[prop].push([func, false]);
 };
@@ -69,21 +69,32 @@ KVO.prototype.once_didGetID = function(id, prop, func) {
 	this.observers[id].didGet[prop].push([func, true]);
 };
 
-KVO.prototype.wrapSetter = function(id, prop, setter) {
-	var self = this;
-
-	return function(value) {
-		setter.call(this, value);
-		self.do_didSet(id, prop, value);
-	};
-};
-
 KVO.prototype.generateSetter = function(id, prop) {
 	var self = this;
 	var _kvo = this.setKey;
 
 	return function(value) {
 		this[_kvo][prop] = value;
+		self.do_didSet(id, prop, value);
+	};
+};
+
+KVO.prototype.generateGetter = function(id, prop) {
+	var self = this;
+	var _kvo = this.setKey;
+
+	return function() {
+		var value = this[_kvo][prop];
+		self.do_didGet(id, prop, value);
+		return value;
+	};
+};
+
+KVO.prototype.wrapSetter = function(id, prop, setter) {
+	var self = this;
+
+	return function(value) {
+		setter.call(this, value);
 		self.do_didSet(id, prop, value);
 	};
 };
@@ -98,16 +109,6 @@ KVO.prototype.wrapGetter = function(id, prop, getter) {
 	};
 };
 
-KVO.prototype.generateGetter = function(id, prop) {
-	var self = this;
-	var _kvo = this.setKey;
-
-	return function() {
-		var value = this[_kvo][prop];
-		self.do_didGet(id, prop, value);
-		return value;
-	};
-};
 
 KVO.prototype.convert = function(obj, prop) {
 	if(this.isBound(obj) === false) {

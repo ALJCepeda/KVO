@@ -1,13 +1,13 @@
 function setupTests() {
 
 describe("KVO", function() {
-	xdescribe("KVO Conversion", function() {
+	describe("KVO Conversion", function() {
 		var kvo;
 
 		beforeEach(function() {
 			kvo = new KVO();
 		});
-		
+
 		it("throw exception, missing getter", function() {
 			var obj = {
 				_firstname:"",
